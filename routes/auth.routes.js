@@ -23,7 +23,9 @@ router.post("/signup", (req, res, next) => {
 
   // Check if email or password or name are provided as empty strings
   if (email === "" || password === "" || name === "" || preference === "") {
-    res.status(400).json({ message: "Provide email, password, name and preference" });
+    res
+      .status(400)
+      .json({ message: "Provide email, password, name and preference" });
     return;
   }
 
@@ -62,6 +64,12 @@ router.post("/signup", (req, res, next) => {
       return User.create({ email, password: hashedPassword, name, preference });
     })
     .then((createdUser) => {
+      if (!createdUser) {
+        // Handle the case where createdUser is undefined
+        res.status(500).json({ message: "Error creating user." });
+        return;
+      }
+
       // Deconstruct the newly created user object to omit the password
       // We should never expose passwords publicly
       const { email, name, preference, _id } = createdUser;
@@ -72,6 +80,7 @@ router.post("/signup", (req, res, next) => {
       // Send a json response containing the user object
       res.status(201).json({ user: user });
     })
+
     .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
 });
 
@@ -123,11 +132,30 @@ router.post("/login", (req, res, next) => {
 
 // POST /auth/ownersignup
 router.post("/ownersignup", (req, res, next) => {
-  const { ownerEmail, ownerPassword, ownerName, ownerPhone, city, state, zip, country } = req.body;
-console.log(req.body);
+  const {
+    ownerEmail,
+    ownerPassword,
+    ownerName,
+    ownerPhone,
+    city,
+    state,
+    zip,
+    country,
+  } = req.body;
+  console.log(req.body);
   // Check if email or password or name are provided as empty strings
-  if (ownerEmail === "" || ownerPassword === "" || ownerName === "" || ownerPhone === "" || city === "" || state === ""  || country === "") {
-    res.status(400).json({ message: "Provide email, password, name and address" });
+  if (
+    ownerEmail === "" ||
+    ownerPassword === "" ||
+    ownerName === "" ||
+    ownerPhone === "" ||
+    city === "" ||
+    state === "" ||
+    country === ""
+  ) {
+    res
+      .status(400)
+      .json({ message: "Provide email, password, name and address" });
     return;
   }
 
@@ -163,15 +191,42 @@ console.log(req.body);
 
       // Create the new user in the database
       // We return a pending promise, which allows us to chain another `then`
-      return Owner.create({ ownerEmail, ownerPassword: hashedPassword, ownerName, ownerPhone, city, state, zip, country });
+      return Owner.create({
+        ownerEmail,
+        ownerPassword: hashedPassword,
+        ownerName,
+        ownerPhone,
+        city,
+        state,
+        zip,
+        country,
+      });
     })
     .then((createdOwner) => {
       // Deconstruct the newly created user object to omit the password
       // We should never expose passwords publicly
-      const { ownerEmail, ownerName, ownerPhone, city, state, zip, country, _id } = createdOwner;
+      const {
+        ownerEmail,
+        ownerName,
+        ownerPhone,
+        city,
+        state,
+        zip,
+        country,
+        _id,
+      } = createdOwner;
 
       // Create a new object that doesn't expose the password
-      const owner = { ownerEmail, ownerName, ownerPhone, city, state, zip, country, _id };
+      const owner = {
+        ownerEmail,
+        ownerName,
+        ownerPhone,
+        city,
+        state,
+        zip,
+        country,
+        _id,
+      };
 
       // Send a json response containing the user object
       res.status(201).json({ owner: owner });
@@ -199,7 +254,10 @@ router.post("/ownerlogin", (req, res, next) => {
       }
 
       // Compare the provided password with the one saved in the database
-      const passwordCorrect = bcrypt.compareSync(ownerPassword, foundUser.ownerPassword);
+      const passwordCorrect = bcrypt.compareSync(
+        ownerPassword,
+        foundUser.ownerPassword
+      );
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
@@ -222,9 +280,6 @@ router.post("/ownerlogin", (req, res, next) => {
     })
     .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
 });
-
-
-
 
 // GET  /auth/verify  -  Used to verify JWT stored on the client
 router.get("/verify", isAuthenticated, (req, res, next) => {

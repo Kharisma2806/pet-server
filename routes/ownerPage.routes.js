@@ -7,10 +7,7 @@ const Pet = require("../models/Pet.model");
 const jwt = require("jsonwebtoken");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 require("dotenv").config();
-const Pets = require("../models/Pet.model")
-
-
-
+const Pets = require("../models/Pet.model");
 
 //Owner Page Routes
 // Configure Cloudinary
@@ -23,7 +20,8 @@ cloudinary.config({
 // POST /pet/petprofile - Creates a new pet and associates it with the authenticated owner
 router.post("/petprofile", isAuthenticated, async (req, res, next) => {
   try {
-    const { name, category, type, age, temper, special_needs, image } = req.body;
+    const { name, category, type, age, temper, special_needs, image } =
+      req.body;
 
     // Get the authenticated owner ID from the request payload
     const ownerId = req.payload._id;
@@ -44,12 +42,11 @@ router.post("/petprofile", isAuthenticated, async (req, res, next) => {
     await pet.save();
 
     // Send a response with the newly created pet object
-    res.status(201).json({ pet });
+    res.status(201).json({ pet: { ...pet.toObject(), ownerId } });
   } catch (err) {
     next(err);
   }
 });
-
 
 // Handle image upload
 router.post("/pet/upload", upload.single("file"), (req, res) => {
@@ -77,7 +74,7 @@ router.get("/pets", async (req, res) => {
 
 router.get("/dogs", async (req, res) => {
   try {
-    const allDogs = await Pet.find({ category: 'dog' });
+    const allDogs = await Pet.find({ category: "dog" });
     res.json(allDogs);
   } catch (error) {
     console.error("Error fetching dogs:", error);
@@ -87,7 +84,7 @@ router.get("/dogs", async (req, res) => {
 
 router.get("/cats", async (req, res) => {
   try {
-    const allCats = await Pet.find({ category: 'cat' });
+    const allCats = await Pet.find({ category: "cat" });
     res.json(allCats);
   } catch (error) {
     console.error("Error fetching dogs:", error);
@@ -97,7 +94,7 @@ router.get("/cats", async (req, res) => {
 
 router.get("/small_animals", async (req, res) => {
   try {
-    const allLittleAnimals = await Pet.find({ category: 'small_animal' });
+    const allLittleAnimals = await Pet.find({ category: "small_animal" });
     res.json(allLittleAnimals);
   } catch (error) {
     console.error("Error fetching dogs:", error);
